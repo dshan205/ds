@@ -1,0 +1,4526 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSHAN - Manajemen Stok</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+
+        <div class="brand">
+            <div class="brand-logo">D</div>
+            <div>
+                <h2>DSHAN</h2>
+                <span>Stock Management</span>
+            </div>
+        </div>
+
+        <nav>
+            <button class="nav-item active" data-page="dashboard">
+                <span>📊</span> Dashboard
+            </button>
+
+            <button class="nav-item" data-page="stock">
+                <span>📦</span> Data Stok
+            </button>
+
+            <button class="nav-item" data-page="transactions">
+                <span>🔄</span> Transaksi
+            </button>
+
+            <button class="nav-item" data-page="opname">
+                <span>📋</span> Stok Opname
+            </button>
+
+            <button class="nav-item" data-page="reports">
+                <span>📈</span> Laporan Bulanan
+            </button>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <button class="reset-btn" onclick="resetAllData()">
+                🗑️ Reset Data
+            </button>
+        </div>
+
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+
+            <button class="mobile-menu" onclick="toggleSidebar()">☰</button>
+
+            <div>
+                <h1 id="pageTitle">Dashboard</h1>
+                <p id="todayText"></p>
+            </div>
+
+            <div class="topbar-right">
+                <strong>DSHAN</strong>
+            </div>
+
+        </header>
+
+
+        <!-- ================= DASHBOARD ================= -->
+        <section class="page active" id="page-dashboard">
+
+            <div class="page-header">
+                <div>
+                    <h2>Dashboard</h2>
+                    <p>Ringkasan stok dan transaksi</p>
+                </div>
+
+                <button class="primary-btn" onclick="openBulkProductModal()">
+                    + Tambah Banyak Barang
+                </button>
+            </div>
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+                    <div class="stat-icon blue">📦</div>
+                    <div>
+                        <span>Total Barang</span>
+                        <strong id="dashProducts">0</strong>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon green">⬆️</div>
+                    <div>
+                        <span>Total Masuk</span>
+                        <strong id="dashIncoming">0</strong>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon red">⬇️</div>
+                    <div>
+                        <span>Total Keluar</span>
+                        <strong id="dashOutgoing">0</strong>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon purple">📊</div>
+                    <div>
+                        <span>Stok Saat Ini</span>
+                        <strong id="dashCurrentStock">0</strong>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon orange">💰</div>
+                    <div>
+                        <span>Nilai Persediaan</span>
+                        <strong id="dashInventoryValue">Rp 0</strong>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon cyan">💵</div>
+                    <div>
+                        <span>Total Nilai Transaksi</span>
+                        <strong id="dashTransactionValue">Rp 0</strong>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon green">📈</div>
+                    <div>
+                        <span>Total Keuntungan</span>
+                        <strong id="dashProfit">Rp 0</strong>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon red">📉</div>
+                    <div>
+                        <span>Total Kerugian</span>
+                        <strong id="dashLoss">Rp 0</strong>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon yellow">⚠️</div>
+                    <div>
+                        <span>Total Kurang</span>
+                        <strong id="dashShortage">0</strong>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon pink">➕</div>
+                    <div>
+                        <span>Total Lebih</span>
+                        <strong id="dashExcess">0</strong>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-grid">
+
+                <div class="card">
+
+                    <div class="card-header">
+                        <div>
+                            <h3>Transaksi Terbaru</h3>
+                            <p>Perubahan stok terbaru</p>
+                        </div>
+
+                        <button class="text-btn"
+                                onclick="showPage('transactions')">
+                            Lihat Semua
+                        </button>
+                    </div>
+
+                    <div id="recentTransactions"></div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <div class="card-header">
+                        <div>
+                            <h3>Stok Menipis</h3>
+                            <p>Barang di bawah minimum stok</p>
+                        </div>
+                    </div>
+
+                    <div id="lowStockList"></div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= DATA STOK ================= -->
+        <section class="page" id="page-stock">
+
+            <div class="page-header">
+
+                <div>
+                    <h2>Data Stok</h2>
+                    <p>Kelola seluruh barang dan jumlah stok</p>
+                </div>
+
+                <button class="primary-btn"
+                        onclick="openBulkProductModal()">
+                    + Tambah Banyak Barang
+                </button>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="toolbar">
+
+                    <div class="search-box">
+                        🔍
+                        <input
+                            type="text"
+                            id="stockSearch"
+                            placeholder="Cari kode atau nama barang..."
+                            oninput="renderStock()"
+                        >
+                    </div>
+
+                    <select id="stockCategory"
+                            onchange="renderStock()">
+                        <option value="">Semua Kategori</option>
+                        <option value="Reseller">Reseller</option>
+                        <option value="Pemakai">Pemakai</option>
+                    </select>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+                        <tr>
+                            <th>Foto</th>
+                            <th>Kode</th>
+                            <th>Barang</th>
+                            <th>Kategori</th>
+                            <th>Harga</th>
+                            <th>Awal</th>
+                            <th>Masuk</th>
+                            <th>Keluar</th>
+                            <th>Stok Reseller</th>
+                            <th>Stok Pemakai</th>
+                            <th>Stok</th>
+                            <th>Aksi</th>
+                        </tr>
+                        </thead>
+
+                        <tbody id="stockTable"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= TRANSACTIONS ================= -->
+        <section class="page" id="page-transactions">
+
+            <div class="page-header">
+
+                <div>
+                    <h2>Transaksi</h2>
+                    <p>Semua perubahan stok tercatat di sini</p>
+                </div>
+
+                <button class="primary-btn"
+                        onclick="openTransactionModal()">
+                    + Transaksi Baru
+                </button>
+
+            </div>
+
+
+            <div class="stats-grid mini">
+
+                <div class="stat-card">
+                    <div class="stat-icon green">⬆️</div>
+                    <div>
+                        <span>Barang Masuk</span>
+                        <strong id="trxIncoming">0</strong>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon red">⬇️</div>
+                    <div>
+                        <span>Barang Keluar</span>
+                        <strong id="trxOutgoing">0</strong>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon purple">💰</div>
+                    <div>
+                        <span>Total Nilai</span>
+                        <strong id="trxValue">Rp 0</strong>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="toolbar">
+
+                    <div class="search-box">
+                        🔍
+                        <input
+                            type="text"
+                            id="transactionSearch"
+                            placeholder="Cari transaksi..."
+                            oninput="renderTransactions()"
+                        >
+                    </div>
+
+                    <select id="transactionType"
+                            onchange="renderTransactions()">
+
+                        <option value="">Semua Transaksi</option>
+                        <option value="Masuk">Masuk</option>
+                        <option value="Keluar">Keluar</option>
+
+                    </select>
+
+                    <select id="transactionCustomerType"
+                            onchange="renderTransactions()">
+                        <option value="">Semua Jenis Pelanggan</option>
+                        <option value="Reseller">Reseller</option>
+                        <option value="Pemakai">Pemakai</option>
+                    </select>
+
+                    <input
+                        type="month"
+                        id="transactionMonth"
+                        onchange="renderTransactions()"
+                    >
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Barang</th>
+                            <th>Kategori</th>
+                            <th>Tipe</th>
+                            <th>Qty</th>
+                            <th>Harga</th>
+                            <th>Total</th>
+                            <th>Keterangan</th>
+                            <th>Aksi</th>
+                        </tr>
+                        </thead>
+
+                        <tbody id="transactionTable"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= OPNAME ================= -->
+        <section class="page" id="page-opname">
+
+            <div class="page-header">
+
+                <div>
+                    <h2>Stok Opname</h2>
+                    <p>Bandingkan stok sistem dengan stok fisik</p>
+                </div>
+
+                <button class="primary-btn"
+                        onclick="openOpnameModal()">
+                    + Stok Opname
+                </button>
+
+            </div>
+
+
+            <div class="stats-grid mini">
+
+                <div class="stat-card">
+                    <div class="stat-icon yellow">⚠️</div>
+                    <div>
+                        <span>Total Kurang</span>
+                        <strong id="opnameShortage">0</strong>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon pink">➕</div>
+                    <div>
+                        <span>Total Lebih</span>
+                        <strong id="opnameExcess">0</strong>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Barang</th>
+                            <th>Kategori</th>
+                            <th>Stok Sistem</th>
+                            <th>Stok Fisik</th>
+                            <th>Selisih</th>
+                            <th>Status</th>
+                            <th>Keterangan</th>
+                            <th>Aksi</th>
+                        </tr>
+                        </thead>
+
+                        <tbody id="opnameTable"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= REPORT ================= -->
+        <section class="page" id="page-reports">
+
+            <div class="page-header">
+
+                <div>
+                    <h2>Laporan Bulanan</h2>
+                    <p>Ringkasan transaksi berdasarkan bulan</p>
+                </div>
+
+                <button class="secondary-btn"
+                        onclick="exportCSV()">
+                    📥 Export CSV
+                </button>
+
+            </div>
+
+
+            <div class="report-filter">
+
+                <label>
+                    Pilih Bulan
+                    <input type="month"
+                           id="reportMonth"
+                           onchange="renderReport()">
+                </label>
+
+            </div>
+
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+                    <div class="stat-icon green">⬆️</div>
+                    <div>
+                        <span>Total Masuk</span>
+                        <strong id="reportIncoming">0</strong>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon red">⬇️</div>
+                    <div>
+                        <span>Total Keluar</span>
+                        <strong id="reportOutgoing">0</strong>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon blue">🏪</div>
+                    <div>
+                        <span>Keluar Reseller</span>
+                        <strong id="reportReseller">0</strong>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon purple">👕</div>
+                    <div>
+                        <span>Keluar Pemakai</span>
+                        <strong id="reportPemakai">0</strong>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon cyan">💰</div>
+                    <div>
+                        <span>Nilai Masuk</span>
+                        <strong id="reportIncomingValue">Rp 0</strong>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon orange">💵</div>
+                    <div>
+                        <span>Nilai Keluar</span>
+                        <strong id="reportOutgoingValue">Rp 0</strong>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon green">📈</div>
+                    <div>
+                        <span>Keuntungan</span>
+                        <strong id="reportProfit">Rp 0</strong>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon red">📉</div>
+                    <div>
+                        <span>Kerugian</span>
+                        <strong id="reportLoss">Rp 0</strong>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-grid">
+
+                <div class="card">
+
+                    <div class="card-header">
+                        <div>
+                            <h3>Grafik Transaksi</h3>
+                            <p>Perbandingan barang masuk dan keluar</p>
+                        </div>
+                    </div>
+
+                    <div class="chart">
+
+                        <div class="chart-row">
+                            <span>Masuk</span>
+                            <div class="bar-container">
+                                <div class="bar incoming"
+                                     id="barIncoming"></div>
+                            </div>
+                            <strong id="chartIncoming">0</strong>
+                        </div>
+
+                        <div class="chart-row">
+                            <span>Keluar</span>
+                            <div class="bar-container">
+                                <div class="bar outgoing"
+                                     id="barOutgoing"></div>
+                            </div>
+                            <strong id="chartOutgoing">0</strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <div class="card-header">
+                        <div>
+                            <h3>Total Keseluruhan</h3>
+                            <p>Nilai persediaan saat ini</p>
+                        </div>
+                    </div>
+
+                    <div class="big-total"
+                         id="reportInventoryValue">
+                        Rp 0
+                    </div>
+
+                    <div class="total-label">
+                        Nilai seluruh stok yang tersedia
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-header">
+                    <div>
+                        <h3>Detail Laporan Barang</h3>
+                        <p>Pergerakan barang pada bulan terpilih</p>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+                        <tr>
+                            <th>Barang</th>
+                            <th>Kategori</th>
+                            <th>Masuk</th>
+                            <th>Keluar</th>
+                            <th>Stok Sekarang</th>
+                            <th>Harga</th>
+                            <th>Keuntungan</th>
+                            <th>Kerugian</th>
+                        </tr>
+                        </thead>
+
+                        <tbody id="reportTable"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- ================= MODAL BARANG BANYAK ================= -->
+<div class="modal-overlay"
+     id="bulkProductModal">
+
+    <div class="modal large">
+
+        <div class="modal-header">
+
+            <div>
+                <h2>Tambah Banyak Barang</h2>
+                <p>Masukkan beberapa barang sekaligus</p>
+            </div>
+
+            <button class="close-btn"
+                    onclick="closeModal('bulkProductModal')">
+                ×
+            </button>
+
+        </div>
+
+
+        <form id="bulkProductForm"
+              onsubmit="saveBulkProducts(event)">
+
+            <div class="bulk-table-wrapper">
+
+                <table class="bulk-table">
+
+                    <thead>
+                    <tr>
+                        <th>Kode</th>
+                        <th>Nama Barang</th>
+                        <th>Kategori</th>
+                        <th>Stok Awal</th>
+                        <th>Min. Stok</th>
+                        <th>Satuan</th>
+                        <th>Harga</th>
+                        <th>Modal Awal Bikin Baju</th>
+                        <th>Foto</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="bulkProductRows"></tbody>
+
+                </table>
+
+            </div>
+
+
+            <div class="bulk-actions">
+
+                <button type="button"
+                        class="secondary-btn"
+                        onclick="addBulkRow()">
+                    + Tambah Baris
+                </button>
+
+                <div>
+
+                    <button type="button"
+                            class="cancel-btn"
+                            onclick="closeModal('bulkProductModal')">
+                        Batal
+                    </button>
+
+                    <button type="submit"
+                            class="primary-btn">
+                        💾 Simpan Semua Barang
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- ================= MODAL EDIT BARANG ================= -->
+<div class="modal-overlay"
+     id="productModal">
+
+    <div class="modal">
+
+        <div class="modal-header">
+
+            <h2 id="productModalTitle">
+                Edit Barang
+            </h2>
+
+            <button class="close-btn"
+                    onclick="closeModal('productModal')">
+                ×
+            </button>
+
+        </div>
+
+
+        <form id="productForm"
+              onsubmit="saveProduct(event)">
+
+            <input type="hidden"
+                   id="productId">
+
+            <div class="form-grid">
+
+                <label>
+                    Kode Barang
+                    <input id="productCode"
+                           required>
+                </label>
+
+                <label>
+                    Nama Barang
+                    <input id="productName"
+                           required>
+                </label>
+
+                <label>
+                    Kategori
+                    <select id="productCategory"
+                            required>
+                        <option value="Reseller">Reseller</option>
+                        <option value="Pemakai">Pemakai</option>
+                    </select>
+                </label>
+
+                <label>
+                    Stok Awal
+                    <input type="number"
+                           id="productInitialStock"
+                           min="0"
+                           value="0"
+                           required>
+                </label>
+
+                <label>
+                    Minimum Stok
+                    <input type="number"
+                           id="productMinStock"
+                           min="0"
+                           value="0">
+                </label>
+
+                <label>
+                    Satuan
+                    <input id="productUnit"
+                           value="pcs">
+                </label>
+
+                <label>
+                    Harga
+                    <input type="number"
+                           id="productPrice"
+                           min="0"
+                           value="0">
+                </label>
+
+                <label>
+                    Modal Awal Bikin Baju
+                    <input type="number"
+                           id="productInitialCost"
+                           min="0"
+                           value="0">
+                </label>
+
+                <label>
+                    Foto Barang
+                    <input type="file"
+                           id="productPhoto"
+                           accept="image/*">
+                </label>
+
+            </div>
+
+
+            <div id="productPhotoPreview"
+                 class="photo-preview">
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button type="button"
+                        class="cancel-btn"
+                        onclick="closeModal('productModal')">
+                    Batal
+                </button>
+
+                <button type="submit"
+                        class="primary-btn">
+                    Simpan Barang
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- ================= MODAL TRANSAKSI ================= -->
+<div class="modal-overlay"
+     id="transactionModal">
+
+    <div class="modal">
+
+        <div class="modal-header">
+
+            <div>
+                <h2>Transaksi Stok</h2>
+                <p>Perubahan otomatis memengaruhi stok</p>
+            </div>
+
+            <button class="close-btn"
+                    onclick="closeModal('transactionModal')">
+                ×
+            </button>
+
+        </div>
+
+
+        <form id="transactionForm"
+              onsubmit="saveTransaction(event)">
+
+            <input type="hidden"
+                   id="transactionId">
+
+            <div class="form-grid">
+
+                <label>
+                    Tanggal
+                    <input type="date"
+                           id="transactionDate"
+                           required>
+                </label>
+
+                <label>
+                    Barang
+                    <select id="transactionProduct"
+                            onchange="updateTransactionProduct()"
+                            required>
+                    </select>
+                </label>
+
+                <label>
+                    Jenis
+                    <select id="transactionTypeInput"
+                            onchange="updateTransactionType()"
+                            required>
+                        <option value="Masuk">Masuk</option>
+                        <option value="Keluar">Keluar</option>
+                    </select>
+                </label>
+
+                <label>
+                    Kategori
+                    <select id="transactionCategoryInput"
+                            required>
+                        <option value="Reseller">Reseller</option>
+                        <option value="Pemakai">Pemakai</option>
+                    </select>
+                </label>
+
+                <label>
+                    Jumlah
+                    <input type="number"
+                           id="transactionQty"
+                           min="1"
+                           value="1"
+                           required>
+                    <small id="stockInfo"></small>
+                </label>
+
+                <label>
+                    Harga Satuan
+                    <input type="number"
+                           id="transactionPrice"
+                           min="0"
+                           value="0"
+                           required>
+                </label>
+
+            </div>
+
+
+            <label>
+                Keterangan
+                <textarea id="transactionNote"
+                          rows="3"
+                          placeholder="Contoh: stok masuk dari supplier..."></textarea>
+            </label>
+
+
+            <div class="transaction-preview">
+
+                <span>Total Transaksi</span>
+
+                <strong id="transactionTotalPreview">
+                    Rp 0
+                </strong>
+
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button type="button"
+                        class="cancel-btn"
+                        onclick="closeModal('transactionModal')">
+                    Batal
+                </button>
+
+                <button type="submit"
+                        class="primary-btn">
+                    Simpan Transaksi
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- ================= MODAL OPNAME ================= -->
+<div class="modal-overlay"
+     id="opnameModal">
+
+    <div class="modal">
+
+        <div class="modal-header">
+
+            <div>
+                <h2>Stok Opname</h2>
+                <p>Masukkan hasil stok fisik</p>
+            </div>
+
+            <button class="close-btn"
+                    onclick="closeModal('opnameModal')">
+                ×
+            </button>
+
+        </div>
+
+
+        <form id="opnameForm"
+              onsubmit="saveOpname(event)">
+
+            <label>
+                Tanggal
+                <input type="date"
+                       id="opnameDate"
+                       required>
+            </label>
+
+            <label>
+                Barang
+                <select id="opnameProduct"
+                        onchange="updateOpnameStock()"
+                        required>
+                </select>
+            </label>
+
+            <label>
+                Kategori
+                <select id="opnameCategory"
+                        onchange="updateOpnameStock()"
+                        required>
+                    <option value="Reseller">Reseller</option>
+                    <option value="Pemakai">Pemakai</option>
+                </select>
+            </label>
+
+
+            <div class="opname-info">
+
+                <div>
+                    <span>Stok Sistem</span>
+                    <strong id="opnameSystemStock">0</strong>
+                </div>
+
+                <div>
+                    <span>Selisih</span>
+                    <strong id="opnameDifference">0</strong>
+                </div>
+
+            </div>
+
+
+            <label>
+                Stok Fisik
+                <input type="number"
+                       id="opnamePhysicalStock"
+                       min="0"
+                       value="0"
+                       oninput="updateOpnameDifference()"
+                       required>
+            </label>
+
+            <label>
+                Keterangan
+                <textarea id="opnameNote"
+                          rows="3"></textarea>
+            </label>
+
+
+            <div class="modal-actions">
+
+                <button type="button"
+                        class="cancel-btn"
+                        onclick="closeModal('opnameModal')">
+                    Batal
+                </button>
+
+                <button type="submit"
+                        class="primary-btn">
+                    Simpan Opname
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- TOAST -->
+<div id="toast"
+     class="toast">
+</div>
+
+
+<script>
+
+/* =========================================================
+   STORAGE
+========================================================= */
+
+const STORAGE = {
+    products: "dshan_products_v3",
+    transactions: "dshan_transactions_v3",
+    opname: "dshan_opname_v3"
+};
+
+let products = loadData(STORAGE.products, []);
+let transactions = loadData(STORAGE.transactions, []);
+let opname = loadData(STORAGE.opname, []);
+
+
+/* =========================================================
+   BASIC HELPERS
+========================================================= */
+
+function loadData(key, fallback) {
+
+    try {
+
+        const data = localStorage.getItem(key);
+
+        return data ? JSON.parse(data) : fallback;
+
+    } catch (error) {
+
+        return fallback;
+
+    }
+
+}
+
+
+function saveData() {
+
+    try {
+
+        localStorage.setItem(
+            STORAGE.products,
+            JSON.stringify(products)
+        );
+
+        localStorage.setItem(
+            STORAGE.transactions,
+            JSON.stringify(transactions)
+        );
+
+        localStorage.setItem(
+            STORAGE.opname,
+            JSON.stringify(opname)
+        );
+
+        return true;
+
+    } catch (error) {
+
+        console.error("Gagal menyimpan data:", error);
+
+        if (error && error.name === "QuotaExceededError") {
+            showToast(
+                "Penyimpanan browser penuh. Kurangi ukuran/jumlah foto lalu coba lagi.",
+                "error"
+            );
+        } else {
+            showToast(
+                "Data gagal disimpan. Coba lagi.",
+                "error"
+            );
+        }
+
+        return false;
+
+    }
+
+}
+
+
+function generateId() {
+
+    return Date.now().toString(36) +
+           Math.random().toString(36).substring(2, 8);
+
+}
+
+
+function formatNumber(number) {
+
+    return Number(number || 0)
+        .toLocaleString("id-ID");
+
+}
+
+
+function formatRupiah(number) {
+
+    return "Rp " +
+        Number(number || 0)
+            .toLocaleString("id-ID");
+
+}
+
+
+function escapeHtml(value) {
+
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+}
+
+
+function today() {
+
+    const d = new Date();
+
+    const year = d.getFullYear();
+
+    const month = String(
+        d.getMonth() + 1
+    ).padStart(2, "0");
+
+    const day = String(
+        d.getDate()
+    ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+
+}
+
+
+function currentMonth() {
+
+    return today().substring(0, 7);
+
+}
+
+
+/* =========================================================
+   PRODUCT STOCK CALCULATION
+========================================================= */
+
+/*
+    INI BAGIAN PENTING.
+
+    Stok tidak disimpan sebagai angka tetap.
+
+    Stok dihitung:
+
+    Stok Awal
+    + seluruh transaksi MASUK
+    - seluruh transaksi KELUAR
+
+    Jadi apabila transaksi berubah,
+    Data Stok otomatis ikut berubah.
+*/
+
+function getProductTransactions(productId) {
+
+    return transactions.filter(
+        trx => trx.productId === productId
+    );
+
+}
+
+
+function getProductIncoming(productId) {
+
+    return getProductTransactions(productId)
+        .filter(trx => trx.type === "Masuk")
+        .reduce(
+            (total, trx) =>
+                total + Number(trx.qty || 0),
+            0
+        );
+
+}
+
+
+function getProductOutgoing(productId) {
+
+    return getProductTransactions(productId)
+        .filter(trx => trx.type === "Keluar")
+        .reduce(
+            (total, trx) =>
+                total + Number(trx.qty || 0),
+            0
+        );
+
+}
+
+
+function getCurrentStock(product) {
+
+    return Number(product.initialStock || 0)
+        + getProductIncoming(product.id)
+        - getProductOutgoing(product.id);
+
+}
+
+function getCurrentStockByCategory(product, category) {
+
+    const initial =
+        product.category === category
+            ? Number(product.initialStock || 0)
+            : 0;
+
+    const incoming =
+        getProductTransactions(product.id)
+            .filter(trx =>
+                trx.type === "Masuk" &&
+                trx.category === category
+            )
+            .reduce(
+                (total, trx) =>
+                    total + Number(trx.qty || 0),
+                0
+            );
+
+    const outgoing =
+        getProductTransactions(product.id)
+            .filter(trx =>
+                trx.type === "Keluar" &&
+                trx.category === category
+            )
+            .reduce(
+                (total, trx) =>
+                    total + Number(trx.qty || 0),
+                0
+            );
+
+    return initial + incoming - outgoing;
+
+}
+
+
+function getProductAverageCost(product) {
+
+    const initialQty = Number(product.initialStock || 0);
+    const initialValue =
+        initialQty * Number(product.initialCost || 0);
+
+    const incomingTransactions =
+        getProductTransactions(product.id)
+            .filter(trx => trx.type === "Masuk");
+
+    const incomingQty =
+        incomingTransactions.reduce(
+            (total, trx) => total + Number(trx.qty || 0),
+            0
+        );
+
+    const incomingValue =
+        incomingTransactions.reduce(
+            (total, trx) =>
+                total + Number(trx.totalValue || 0),
+            0
+        );
+
+    const totalQty = initialQty + incomingQty;
+
+    return totalQty > 0
+        ? (initialValue + incomingValue) / totalQty
+        : Number(product.initialCost || 0);
+
+}
+
+
+function getProductProfitLoss(product) {
+
+    const cost = getProductAverageCost(product);
+
+    return getProductTransactions(product.id)
+        .filter(trx => trx.type === "Keluar")
+        .reduce(
+            (total, trx) =>
+                total +
+                (Number(trx.totalValue || 0) -
+                 Number(trx.qty || 0) * cost),
+            0
+        );
+
+}
+
+
+/* =========================================================
+   PAGE NAVIGATION
+========================================================= */
+
+const pageTitles = {
+    dashboard: "Dashboard",
+    stock: "Data Stok",
+    transactions: "Transaksi",
+    opname: "Stok Opname",
+    reports: "Laporan Bulanan"
+};
+
+
+document.querySelectorAll(".nav-item")
+    .forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            showPage(
+                button.dataset.page
+            );
+
+        });
+
+    });
+
+
+function showPage(page) {
+
+    document.querySelectorAll(".page")
+        .forEach(item => {
+
+            item.classList.remove("active");
+
+        });
+
+
+    const selectedPage =
+        document.getElementById(
+            "page-" + page
+        );
+
+    if (selectedPage) {
+
+        selectedPage.classList.add("active");
+
+    }
+
+
+    document.querySelectorAll(".nav-item")
+        .forEach(item => {
+
+            item.classList.toggle(
+                "active",
+                item.dataset.page === page
+            );
+
+        });
+
+
+    document.getElementById(
+        "pageTitle"
+    ).textContent =
+        pageTitles[page] || "DSHAN";
+
+
+    if (window.innerWidth <= 900) {
+
+        document.getElementById(
+            "sidebar"
+        ).classList.remove("open");
+
+    }
+
+
+    refreshAll();
+
+}
+
+
+function toggleSidebar() {
+
+    document.getElementById(
+        "sidebar"
+    ).classList.toggle("open");
+
+}
+
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+function renderDashboard() {
+
+    const totalProducts =
+        products.length;
+
+    const totalIncoming =
+        transactions
+            .filter(t => t.type === "Masuk")
+            .reduce(
+                (sum, t) =>
+                    sum + Number(t.qty),
+                0
+            );
+
+    const totalOutgoing =
+        transactions
+            .filter(t => t.type === "Keluar")
+            .reduce(
+                (sum, t) =>
+                    sum + Number(t.qty),
+                0
+            );
+
+    const currentStock =
+        products.reduce(
+            (sum, product) =>
+                sum + getCurrentStock(product),
+            0
+        );
+
+    const inventoryValue =
+        products.reduce(
+            (sum, product) =>
+                sum +
+                getCurrentStock(product) *
+                Number(product.price || 0),
+            0
+        );
+
+    const transactionValue =
+        transactions.reduce(
+            (sum, trx) =>
+                sum +
+                Number(trx.totalValue || 0),
+            0
+        );
+
+    const profitLoss =
+        products.reduce(
+            (sum, product) =>
+                sum + getProductProfitLoss(product),
+            0
+        );
+
+    const profit = Math.max(profitLoss, 0);
+    const loss = Math.abs(Math.min(profitLoss, 0));
+
+    const shortage =
+        opname
+            .filter(o => o.status === "Kurang")
+            .reduce(
+                (sum, o) =>
+                    sum + Math.abs(Number(o.difference)),
+                0
+            );
+
+    const excess =
+        opname
+            .filter(o => o.status === "Lebih")
+            .reduce(
+                (sum, o) =>
+                    sum + Number(o.difference),
+                0
+            );
+
+
+    document.getElementById(
+        "dashProducts"
+    ).textContent =
+        formatNumber(totalProducts);
+
+
+    document.getElementById(
+        "dashIncoming"
+    ).textContent =
+        formatNumber(totalIncoming);
+
+
+    document.getElementById(
+        "dashOutgoing"
+    ).textContent =
+        formatNumber(totalOutgoing);
+
+
+    document.getElementById(
+        "dashCurrentStock"
+    ).textContent =
+        formatNumber(currentStock);
+
+
+    document.getElementById(
+        "dashInventoryValue"
+    ).textContent =
+        formatRupiah(inventoryValue);
+
+
+    document.getElementById(
+        "dashTransactionValue"
+    ).textContent =
+        formatRupiah(transactionValue);
+
+    document.getElementById(
+        "dashProfit"
+    ).textContent =
+        formatRupiah(profit);
+
+    document.getElementById(
+        "dashLoss"
+    ).textContent =
+        formatRupiah(loss);
+
+
+    document.getElementById(
+        "dashShortage"
+    ).textContent =
+        formatNumber(shortage);
+
+
+    document.getElementById(
+        "dashExcess"
+    ).textContent =
+        formatNumber(excess);
+
+
+    renderRecentTransactions();
+
+    renderLowStock();
+
+}
+
+
+/* =========================================================
+   STOCK TABLE
+========================================================= */
+
+function renderStock() {
+
+    const search =
+        document.getElementById(
+            "stockSearch"
+        )?.value
+        .toLowerCase() || "";
+
+
+    const category =
+        document.getElementById(
+            "stockCategory"
+        )?.value || "";
+
+
+    const filtered =
+        products.filter(product => {
+
+            const matchSearch =
+                product.name
+                    .toLowerCase()
+                    .includes(search)
+                ||
+                product.code
+                    .toLowerCase()
+                    .includes(search);
+
+
+            const matchCategory =
+                !category ||
+                product.category === category;
+
+
+            return matchSearch &&
+                   matchCategory;
+
+        });
+
+
+    const tbody =
+        document.getElementById(
+            "stockTable"
+        );
+
+
+    if (!filtered.length) {
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="12"
+                    class="empty">
+                    Belum ada barang.
+                </td>
+            </tr>
+        `;
+
+        return;
+
+    }
+
+
+    tbody.innerHTML =
+        filtered.map(product => {
+
+            const incoming =
+                getProductIncoming(product.id);
+
+            const outgoing =
+                getProductOutgoing(product.id);
+
+            const stock =
+                getCurrentStock(product);
+
+            const resellerStock =
+                getCurrentStockByCategory(
+                    product,
+                    "Reseller"
+                );
+
+            const pemakaiStock =
+                getCurrentStockByCategory(
+                    product,
+                    "Pemakai"
+                );
+
+
+            let stockClass = "";
+
+            if (stock <= 0) {
+
+                stockClass = "stock-danger";
+
+            } else if (
+                stock <= Number(product.minStock || 0)
+            ) {
+
+                stockClass = "stock-warning";
+
+            } else {
+
+                stockClass = "stock-good";
+
+            }
+
+
+            const photo =
+                product.photo
+                    ? `<img src="${product.photo}"
+                            class="table-photo"
+                            alt="foto">`
+                    : `<div class="no-photo">📦</div>`;
+
+
+            return `
+                <tr>
+
+                    <td>${photo}</td>
+
+                    <td>
+                        <strong>
+                            ${escapeHtml(product.code)}
+                        </strong>
+                    </td>
+
+                    <td>
+                        <strong>
+                            ${escapeHtml(product.name)}
+                        </strong>
+                        <small>
+                            ${escapeHtml(product.unit || "pcs")}
+                        </small>
+                    </td>
+
+                    <td>
+                        <span class="badge ${product.category.toLowerCase()}">
+                            ${escapeHtml(product.category)}
+                        </span>
+                    </td>
+
+                    <td>
+                        ${formatRupiah(product.price)}
+                    </td>
+
+                    <td>
+                        ${formatNumber(product.initialStock)}
+                    </td>
+
+                    <td class="text-green">
+                        +${formatNumber(incoming)}
+                    </td>
+
+                    <td class="text-red">
+                        -${formatNumber(outgoing)}
+                    </td>
+
+                    <td>
+                        <strong class="${resellerStock <= 0 ? "stock-danger" : "stock-good"}">
+                            ${formatNumber(resellerStock)}
+                        </strong>
+                    </td>
+
+                    <td>
+                        <strong class="${pemakaiStock <= 0 ? "stock-danger" : "stock-good"}">
+                            ${formatNumber(pemakaiStock)}
+                        </strong>
+                    </td>
+
+                    <td>
+                        <strong class="${stockClass}">
+                            ${formatNumber(stock)}
+                        </strong>
+                    </td>
+
+                    <td>
+
+                        <div class="action-group">
+
+                            <button
+                                class="small-btn green-btn"
+                                onclick="openQuickTransaction('${product.id}', 'Masuk')">
+                                + Masuk
+                            </button>
+
+                            <button
+                                class="small-btn red-btn"
+                                onclick="openQuickTransaction('${product.id}', 'Keluar')">
+                                − Keluar
+                            </button>
+
+                            <button
+                                class="small-btn"
+                                onclick="editProduct('${product.id}')">
+                                Edit
+                            </button>
+
+                            <button
+                                class="small-btn danger-btn"
+                                onclick="deleteProduct('${product.id}')">
+                                Hapus
+                            </button>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+            `;
+
+        }).join("");
+
+}
+
+
+/* =========================================================
+   BULK PRODUCT
+========================================================= */
+
+function openBulkProductModal() {
+
+    const tbody =
+        document.getElementById(
+            "bulkProductRows"
+        );
+
+    tbody.innerHTML = "";
+
+    addBulkRow();
+    addBulkRow();
+    addBulkRow();
+
+    openModal("bulkProductModal");
+
+}
+
+
+function addBulkRow() {
+
+    const tbody =
+        document.getElementById(
+            "bulkProductRows"
+        );
+
+
+    const row =
+        document.createElement("tr");
+
+
+    row.innerHTML = `
+
+        <td>
+            <input
+                type="text"
+                class="bulk-code"
+                placeholder="BRG001">
+        </td>
+
+        <td>
+            <input
+                type="text"
+                class="bulk-name"
+                placeholder="Nama barang">
+        </td>
+
+        <td>
+            <select class="bulk-category">
+                <option value="Reseller">
+                    Reseller
+                </option>
+                <option value="Pemakai">
+                    Pemakai
+                </option>
+            </select>
+        </td>
+
+        <td>
+            <input
+                type="number"
+                class="bulk-initial"
+                value="0"
+                min="0">
+        </td>
+
+        <td>
+            <input
+                type="number"
+                class="bulk-min"
+                value="0"
+                min="0">
+        </td>
+
+        <td>
+            <input
+                type="text"
+                class="bulk-unit"
+                value="pcs">
+        </td>
+
+        <td>
+            <input
+                type="number"
+                class="bulk-price"
+                value="0"
+                min="0">
+        </td>
+
+        <td>
+            <input
+                type="number"
+                class="bulk-initial-cost"
+                value="0"
+                min="0">
+        </td>
+
+        <td>
+            <input
+                type="file"
+                class="bulk-photo"
+                accept="image/*">
+        </td>
+
+        <td>
+            <button
+                type="button"
+                class="remove-row"
+                onclick="this.closest('tr').remove()">
+                ×
+            </button>
+        </td>
+    `;
+
+
+    tbody.appendChild(row);
+
+}
+
+
+async function saveBulkProducts(event) {
+
+    event.preventDefault();
+
+
+    const rows =
+        [...document.querySelectorAll(
+            "#bulkProductRows tr"
+        )];
+
+
+    let saved = 0;
+
+
+    for (const row of rows) {
+
+        const code =
+            row.querySelector(
+                ".bulk-code"
+            ).value.trim();
+
+        const name =
+            row.querySelector(
+                ".bulk-name"
+            ).value.trim();
+
+
+        if (!code && !name) {
+
+            continue;
+
+        }
+
+
+        if (!code || !name) {
+
+            showToast(
+                "Kode dan nama barang wajib diisi.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        const photoInput =
+            row.querySelector(
+                ".bulk-photo"
+            );
+
+
+        let photo = "";
+
+
+        if (
+            photoInput.files &&
+            photoInput.files[0]
+        ) {
+
+            photo =
+                await compressImage(
+                    photoInput.files[0]
+                );
+
+        }
+
+
+        products.push({
+
+            id: generateId(),
+
+            code,
+
+            name,
+
+            category:
+                row.querySelector(
+                    ".bulk-category"
+                ).value,
+
+            initialStock:
+                Number(
+                    row.querySelector(
+                        ".bulk-initial"
+                    ).value
+                ),
+
+            minStock:
+                Number(
+                    row.querySelector(
+                        ".bulk-min"
+                    ).value
+                ),
+
+            unit:
+                row.querySelector(
+                    ".bulk-unit"
+                ).value || "pcs",
+
+            price:
+                Number(
+                    row.querySelector(
+                        ".bulk-price"
+                    ).value
+                ),
+
+            initialCost:
+                Number(
+                    row.querySelector(
+                        ".bulk-initial-cost"
+                    ).value
+                ),
+
+            photo,
+
+            createdAt:
+                new Date().toISOString()
+
+        });
+
+
+        saved++;
+
+    }
+
+
+    if (!saved) {
+
+        showToast(
+            "Belum ada barang yang diisi.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    saveData();
+
+    closeModal("bulkProductModal");
+
+    refreshAll();
+
+    showToast(
+        `${saved} barang berhasil ditambahkan.`,
+        "success"
+    );
+
+}
+
+
+/* =========================================================
+   PRODUCT EDIT
+========================================================= */
+
+function editProduct(id) {
+
+    const product =
+        products.find(
+            p => p.id === id
+        );
+
+
+    if (!product) return;
+
+
+    document.getElementById(
+        "productId"
+    ).value = product.id;
+
+
+    document.getElementById(
+        "productCode"
+    ).value = product.code;
+
+
+    document.getElementById(
+        "productName"
+    ).value = product.name;
+
+
+    document.getElementById(
+        "productCategory"
+    ).value = product.category;
+
+
+    document.getElementById(
+        "productInitialStock"
+    ).value = product.initialStock;
+
+
+    document.getElementById(
+        "productMinStock"
+    ).value = product.minStock;
+
+
+    document.getElementById(
+        "productUnit"
+    ).value = product.unit;
+
+
+    document.getElementById(
+        "productPrice"
+    ).value = product.price;
+
+
+    document.getElementById(
+        "productInitialCost"
+    ).value = product.initialCost || 0;
+
+
+    const preview =
+        document.getElementById(
+            "productPhotoPreview"
+        );
+
+
+    preview.innerHTML =
+        product.photo
+            ? `<img src="${product.photo}">`
+            : "";
+
+
+    document.getElementById(
+        "productPhoto"
+    ).value = "";
+
+
+    document.getElementById(
+        "productModalTitle"
+    ).textContent =
+        "Edit Barang";
+
+
+    openModal("productModal");
+
+}
+
+
+async function saveProduct(event) {
+
+    event.preventDefault();
+
+
+    const id =
+        document.getElementById(
+            "productId"
+        ).value;
+
+
+    const existing =
+        products.find(
+            p => p.id === id
+        );
+
+
+    let photo =
+        existing?.photo || "";
+
+
+    const photoInput =
+        document.getElementById(
+            "productPhoto"
+        );
+
+
+    if (
+        photoInput.files &&
+        photoInput.files[0]
+    ) {
+
+        photo =
+            await compressImage(
+                photoInput.files[0]
+            );
+
+    }
+
+
+    const data = {
+
+        id:
+            id || generateId(),
+
+        code:
+            document.getElementById(
+                "productCode"
+            ).value.trim(),
+
+        name:
+            document.getElementById(
+                "productName"
+            ).value.trim(),
+
+        category:
+            document.getElementById(
+                "productCategory"
+            ).value,
+
+        initialStock:
+            Number(
+                document.getElementById(
+                    "productInitialStock"
+                ).value
+            ),
+
+        minStock:
+            Number(
+                document.getElementById(
+                    "productMinStock"
+                ).value
+            ),
+
+        unit:
+            document.getElementById(
+                "productUnit"
+            ).value || "pcs",
+
+        price:
+            Number(
+                document.getElementById(
+                    "productPrice"
+                ).value
+            ),
+
+        initialCost:
+            Number(
+                document.getElementById(
+                    "productInitialCost"
+                ).value
+            ),
+
+        photo,
+
+        createdAt:
+            existing?.createdAt ||
+            new Date().toISOString()
+
+    };
+
+
+    if (existing) {
+
+        Object.assign(
+            existing,
+            data
+        );
+
+    } else {
+
+        products.push(data);
+
+    }
+
+
+    saveData();
+
+    closeModal("productModal");
+
+    refreshAll();
+
+    showToast(
+        "Data barang berhasil disimpan.",
+        "success"
+    );
+
+}
+
+
+function deleteProduct(id) {
+
+    const product =
+        products.find(
+            p => p.id === id
+        );
+
+
+    if (!product) return;
+
+
+    const hasTransaction =
+        transactions.some(
+            t => t.productId === id
+        );
+
+
+    if (hasTransaction) {
+
+        alert(
+            "Barang tidak dapat dihapus karena sudah memiliki transaksi."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !confirm(
+            `Hapus barang "${product.name}"?`
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    products =
+        products.filter(
+            p => p.id !== id
+        );
+
+
+    saveData();
+
+    refreshAll();
+
+    showToast(
+        "Barang berhasil dihapus.",
+        "success"
+    );
+
+}
+
+
+/* =========================================================
+   IMAGE COMPRESS
+========================================================= */
+
+function compressImage(file) {
+
+    return new Promise(
+        (resolve, reject) => {
+
+            const reader =
+                new FileReader();
+
+
+            reader.onload = event => {
+
+                const img =
+                    new Image();
+
+
+                img.onload = () => {
+
+                    /*
+                     * Foto disimpan di localStorage sebagai Base64.
+                     * Ukuran dibuat lebih kecil agar foto benar-benar
+                     * bisa disimpan tanpa cepat memenuhi penyimpanan browser.
+                     */
+                    const maxSize = 450;
+
+                    let width =
+                        img.width;
+
+                    let height =
+                        img.height;
+
+
+                    if (
+                        width > maxSize ||
+                        height > maxSize
+                    ) {
+
+                        if (width > height) {
+
+                            height =
+                                height *
+                                maxSize /
+                                width;
+
+                            width =
+                                maxSize;
+
+                        } else {
+
+                            width =
+                                width *
+                                maxSize /
+                                height;
+
+                            height =
+                                maxSize;
+
+                        }
+
+                    }
+
+
+                    const canvas =
+                        document.createElement(
+                            "canvas"
+                        );
+
+
+                    canvas.width =
+                        width;
+
+                    canvas.height =
+                        height;
+
+
+                    const ctx =
+                        canvas.getContext(
+                            "2d"
+                        );
+
+
+                    ctx.drawImage(
+                        img,
+                        0,
+                        0,
+                        width,
+                        height
+                    );
+
+
+                    resolve(
+                        canvas.toDataURL(
+                            "image/jpeg",
+                            0.65
+                        )
+                    );
+
+                };
+
+
+                img.onerror = () =>
+                    reject(
+                        new Error("Foto tidak dapat dibaca.")
+                    );
+
+                img.src =
+                    event.target.result;
+
+            };
+
+
+            reader.onerror = reject;
+
+            reader.readAsDataURL(file);
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   TRANSACTION
+========================================================= */
+
+function populateTransactionProducts() {
+
+    const select =
+        document.getElementById(
+            "transactionProduct"
+        );
+
+
+    select.innerHTML = `
+        <option value="">
+            Pilih barang
+        </option>
+    `;
+
+
+    products.forEach(product => {
+
+        select.innerHTML += `
+            <option value="${product.id}">
+                ${escapeHtml(product.code)}
+                - ${escapeHtml(product.name)}
+            </option>
+        `;
+
+    });
+
+}
+
+
+function openTransactionModal(
+    productId = "",
+    type = "Masuk"
+) {
+
+    populateTransactionProducts();
+
+
+    document.getElementById(
+        "transactionId"
+    ).value = "";
+
+
+    document.getElementById(
+        "transactionDate"
+    ).value = today();
+
+
+    document.getElementById(
+        "transactionProduct"
+    ).value = productId;
+
+
+    document.getElementById(
+        "transactionTypeInput"
+    ).value = type;
+
+
+    document.getElementById(
+        "transactionQty"
+    ).value = 1;
+
+
+    document.getElementById(
+        "transactionNote"
+    ).value = "";
+
+
+    updateTransactionProduct();
+
+    updateTransactionType();
+
+    openModal("transactionModal");
+
+}
+
+
+function openQuickTransaction(
+    productId,
+    type
+) {
+
+    openTransactionModal(
+        productId,
+        type
+    );
+
+}
+
+
+function updateTransactionProduct() {
+
+    const productId =
+        document.getElementById(
+            "transactionProduct"
+        ).value;
+
+
+    const product =
+        products.find(
+            p => p.id === productId
+        );
+
+
+    if (!product) {
+
+        document.getElementById(
+            "transactionPrice"
+        ).value = 0;
+
+        document.getElementById(
+            "stockInfo"
+        ).textContent = "";
+
+        return;
+
+    }
+
+
+    document.getElementById(
+        "transactionPrice"
+    ).value =
+        product.price;
+
+
+    const category =
+        document.getElementById(
+            "transactionCategoryInput"
+        );
+
+    category.value = product.category;
+
+    const stock =
+        getCurrentStockByCategory(
+            product,
+            category.value
+        );
+
+    document.getElementById(
+        "stockInfo"
+    ).textContent =
+        `Stok ${category.value}: ${formatNumber(stock)} ${product.unit}`;
+
+
+    updateTransactionPreview();
+
+}
+
+
+function updateTransactionType() {
+
+    const category =
+        document.getElementById(
+            "transactionCategoryInput"
+        );
+
+    category.disabled = false;
+
+    const productId =
+        document.getElementById(
+            "transactionProduct"
+        ).value;
+
+    const product =
+        products.find(
+            p => p.id === productId
+        );
+
+    if (product) {
+        const stock =
+            getCurrentStockByCategory(
+                product,
+                category.value
+            );
+
+        document.getElementById(
+            "stockInfo"
+        ).textContent =
+            `Stok ${category.value}: ${formatNumber(stock)} ${product.unit}`;
+    }
+
+    updateTransactionPreview();
+
+}
+
+
+function updateTransactionPreview() {
+
+    const qty =
+        Number(
+            document.getElementById(
+                "transactionQty"
+            ).value
+        );
+
+
+    const price =
+        Number(
+            document.getElementById(
+                "transactionPrice"
+            ).value
+        );
+
+
+    document.getElementById(
+        "transactionTotalPreview"
+    ).textContent =
+        formatRupiah(
+            qty * price
+        );
+
+}
+
+
+document.getElementById(
+    "transactionQty"
+).addEventListener(
+    "input",
+    updateTransactionPreview
+);
+
+
+document.getElementById(
+    "transactionPrice"
+).addEventListener(
+    "input",
+    updateTransactionPreview
+);
+
+document.getElementById(
+    "transactionCategoryInput"
+).addEventListener(
+    "change",
+    updateTransactionProduct
+);
+
+
+async function saveTransaction(event) {
+
+    event.preventDefault();
+
+
+    const productId =
+        document.getElementById(
+            "transactionProduct"
+        ).value;
+
+
+    const product =
+        products.find(
+            p => p.id === productId
+        );
+
+
+    if (!product) {
+
+        showToast(
+            "Pilih barang terlebih dahulu.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const type =
+        document.getElementById(
+            "transactionTypeInput"
+        ).value;
+
+
+    const qty =
+        Number(
+            document.getElementById(
+                "transactionQty"
+            ).value
+        );
+
+
+    const price =
+        Number(
+            document.getElementById(
+                "transactionPrice"
+            ).value
+        );
+
+
+    const category =
+        document.getElementById(
+            "transactionCategoryInput"
+        ).value;
+
+    const currentStock =
+        getCurrentStockByCategory(
+            product,
+            category
+        );
+
+
+    /*
+        PENGAMAN STOK.
+
+        Tidak boleh mengeluarkan barang
+        lebih banyak dari stok yang tersedia.
+    */
+
+    if (
+        type === "Keluar" &&
+        qty > currentStock
+    ) {
+
+        showToast(
+            `Stok ${category} tidak cukup. Stok saat ini ${currentStock} ${product.unit}.`,
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if (qty <= 0) {
+
+        showToast(
+            "Jumlah harus lebih dari 0.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+
+
+
+    const transaction = {
+
+        id:
+            generateId(),
+
+        date:
+            document.getElementById(
+                "transactionDate"
+            ).value,
+
+        productId,
+
+        type,
+
+        category,
+
+        qty,
+
+        unitPrice:
+            price,
+
+        totalValue:
+            qty * price,
+
+        note:
+            document.getElementById(
+                "transactionNote"
+            ).value.trim(),
+
+        createdAt:
+            new Date().toISOString()
+
+    };
+
+
+    transactions.push(
+        transaction
+    );
+
+
+    saveData();
+
+
+    closeModal(
+        "transactionModal"
+    );
+
+
+    refreshAll();
+
+
+    showToast(
+        type === "Masuk"
+            ? `Stok ${product.name} bertambah ${qty}.`
+            : `Stok ${product.name} berkurang ${qty}.`,
+        "success"
+    );
+
+}
+
+
+/* =========================================================
+   TRANSACTION TABLE
+========================================================= */
+
+function renderTransactions() {
+
+    const search =
+        document.getElementById(
+            "transactionSearch"
+        )?.value
+        .toLowerCase() || "";
+
+
+    const type =
+        document.getElementById(
+            "transactionType"
+        )?.value || "";
+
+
+    const customerType =
+        document.getElementById(
+            "transactionCustomerType"
+        )?.value || "";
+
+
+    const month =
+        document.getElementById(
+            "transactionMonth"
+        )?.value || "";
+
+
+    const filtered =
+        [...transactions]
+        .reverse()
+        .filter(trx => {
+
+            const product =
+                products.find(
+                    p => p.id === trx.productId
+                );
+
+
+            const productName =
+                product?.name || "";
+
+
+            const searchMatch =
+                productName
+                    .toLowerCase()
+                    .includes(search)
+                ||
+                (trx.note || "")
+                    .toLowerCase()
+                    .includes(search);
+
+
+            const typeMatch =
+                !type ||
+                trx.type === type;
+
+
+            const customerTypeMatch =
+                !customerType ||
+                trx.category === customerType;
+
+
+            const monthMatch =
+                !month ||
+                trx.date.startsWith(month);
+
+
+            return searchMatch &&
+                   typeMatch &&
+                   customerTypeMatch &&
+                   monthMatch;
+
+        });
+
+
+    const tbody =
+        document.getElementById(
+            "transactionTable"
+        );
+
+
+    if (!filtered.length) {
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="9"
+                    class="empty">
+                    Belum ada transaksi.
+                </td>
+            </tr>
+        `;
+
+    } else {
+
+        tbody.innerHTML =
+            filtered.map(trx => {
+
+                const product =
+                    products.find(
+                        p =>
+                            p.id ===
+                            trx.productId
+                    );
+
+
+                const productName =
+                    product?.name ||
+                    "Barang dihapus";
+
+
+                const sign =
+                    trx.type === "Masuk"
+                        ? "+"
+                        : "-";
+
+
+                return `
+                    <tr>
+
+                        <td>
+                            ${formatDate(trx.date)}
+                        </td>
+
+                        <td>
+                            <strong>
+                                ${escapeHtml(productName)}
+                            </strong>
+                        </td>
+
+                        <td>
+                            <span class="badge ${trx.category.toLowerCase()}">
+                                ${escapeHtml(trx.category)}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="trx-type ${trx.type.toLowerCase()}">
+                                ${trx.type}
+                            </span>
+                        </td>
+
+                        <td>
+                            <strong>
+                                ${sign}${formatNumber(trx.qty)}
+                            </strong>
+                        </td>
+
+                        <td>
+                            ${formatRupiah(trx.unitPrice)}
+                        </td>
+
+                        <td>
+                            <strong>
+                                ${formatRupiah(trx.totalValue)}
+                            </strong>
+                        </td>
+
+                        <td>
+                            ${escapeHtml(trx.note || "-")}
+                        </td>
+
+                        <td>
+
+                            <button
+                                class="small-btn danger-btn"
+                                onclick="deleteTransaction('${trx.id}')">
+                                Hapus
+                            </button>
+
+                        </td>
+
+                    </tr>
+                `;
+
+            }).join("");
+
+    }
+
+
+    const incoming =
+        transactions
+            .filter(t => t.type === "Masuk")
+            .reduce(
+                (s, t) =>
+                    s + Number(t.qty),
+                0
+            );
+
+
+    const outgoing =
+        transactions
+            .filter(t => t.type === "Keluar")
+            .reduce(
+                (s, t) =>
+                    s + Number(t.qty),
+                0
+            );
+
+
+    const value =
+        transactions
+            .reduce(
+                (s, t) =>
+                    s + Number(t.totalValue),
+                0
+            );
+
+
+    document.getElementById(
+        "trxIncoming"
+    ).textContent =
+        formatNumber(incoming);
+
+
+    document.getElementById(
+        "trxOutgoing"
+    ).textContent =
+        formatNumber(outgoing);
+
+
+    document.getElementById(
+        "trxValue"
+    ).textContent =
+        formatRupiah(value);
+
+}
+
+
+function deleteTransaction(id) {
+
+    const trx =
+        transactions.find(
+            t => t.id === id
+        );
+
+
+    if (!trx) return;
+
+
+    const product =
+        products.find(
+            p => p.id === trx.productId
+        );
+
+
+    if (
+        !confirm(
+            `Hapus transaksi ${trx.type} ${trx.qty} ${product?.name || ""}?`
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+        Karena stok dihitung berdasarkan transaksi,
+        menghapus transaksi otomatis mengubah stok.
+    */
+
+    transactions =
+        transactions.filter(
+            t => t.id !== id
+        );
+
+
+    saveData();
+
+    refreshAll();
+
+    showToast(
+        "Transaksi dihapus dan stok otomatis dihitung ulang.",
+        "success"
+    );
+
+}
+
+
+/* =========================================================
+   OPNAME
+========================================================= */
+
+function populateOpnameProducts() {
+
+    const select =
+        document.getElementById(
+            "opnameProduct"
+        );
+
+
+    select.innerHTML = `
+        <option value="">
+            Pilih barang
+        </option>
+    `;
+
+
+    products.forEach(product => {
+
+        select.innerHTML += `
+            <option value="${product.id}">
+                ${escapeHtml(product.code)}
+                - ${escapeHtml(product.name)}
+            </option>
+        `;
+
+    });
+
+}
+
+
+function openOpnameModal() {
+
+    populateOpnameProducts();
+
+    document.getElementById(
+        "opnameDate"
+    ).value = today();
+
+    document.getElementById(
+        "opnameCategory"
+    ).value = "Reseller";
+
+    document.getElementById(
+        "opnamePhysicalStock"
+    ).value = 0;
+
+    document.getElementById(
+        "opnameNote"
+    ).value = "";
+
+    document.getElementById(
+        "opnameSystemStock"
+    ).textContent = "0";
+
+    document.getElementById(
+        "opnameDifference"
+    ).textContent = "0";
+
+    openModal("opnameModal");
+
+}
+
+
+function updateOpnameStock() {
+
+    const productId =
+        document.getElementById(
+            "opnameProduct"
+        ).value;
+
+
+    const product =
+        products.find(
+            p => p.id === productId
+        );
+
+
+    const category =
+        document.getElementById(
+            "opnameCategory"
+        ).value;
+
+    const stock =
+        product
+            ? getCurrentStockByCategory(product, category)
+            : 0;
+
+
+    document.getElementById(
+        "opnameSystemStock"
+    ).textContent =
+        formatNumber(stock);
+
+
+    document.getElementById(
+        "opnamePhysicalStock"
+    ).value =
+        stock;
+
+
+    updateOpnameDifference();
+
+}
+
+
+function updateOpnameDifference() {
+
+    const system =
+        Number(
+            document.getElementById(
+                "opnameSystemStock"
+            ).textContent
+                .replace(/\./g, "")
+        );
+
+
+    const physical =
+        Number(
+            document.getElementById(
+                "opnamePhysicalStock"
+            ).value
+        );
+
+
+    const difference =
+        physical - system;
+
+
+    const element =
+        document.getElementById(
+            "opnameDifference"
+        );
+
+
+    element.textContent =
+        difference > 0
+            ? "+" + formatNumber(difference)
+            : formatNumber(difference);
+
+
+    element.className =
+        difference < 0
+            ? "negative"
+            : difference > 0
+                ? "positive"
+                : "";
+
+}
+
+
+function saveOpname(event) {
+
+    event.preventDefault();
+
+
+    const productId =
+        document.getElementById(
+            "opnameProduct"
+        ).value;
+
+
+    const product =
+        products.find(
+            p => p.id === productId
+        );
+
+
+    if (!product) {
+
+        showToast(
+            "Pilih barang.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const category =
+        document.getElementById(
+            "opnameCategory"
+        ).value;
+
+    const systemStock =
+        getCurrentStockByCategory(
+            product,
+            category
+        );
+
+
+    const physicalStock =
+        Number(
+            document.getElementById(
+                "opnamePhysicalStock"
+            ).value
+        );
+
+
+    const difference =
+        physicalStock - systemStock;
+
+
+    let status =
+        "Sesuai";
+
+
+    if (difference < 0) {
+
+        status = "Kurang";
+
+    } else if (difference > 0) {
+
+        status = "Lebih";
+
+    }
+
+
+    const opnameId = generateId();
+
+    opname.push({
+
+        id:
+            opnameId,
+
+        date:
+            document.getElementById(
+                "opnameDate"
+            ).value,
+
+        productId,
+
+        category,
+
+        systemStock,
+
+        physicalStock,
+
+        difference,
+
+        status,
+
+        note:
+            document.getElementById(
+                "opnameNote"
+            ).value.trim()
+
+    });
+
+
+    if (difference !== 0) {
+
+        const cost =
+            getProductAverageCost(product);
+
+        transactions.push({
+            id: generateId(),
+            date: document.getElementById("opnameDate").value,
+            productId,
+            type: difference < 0 ? "Keluar" : "Masuk",
+            category,
+            qty: Math.abs(difference),
+            unitPrice: cost,
+            totalValue: Math.abs(difference) * cost,
+            note: `Penyesuaian stok opname ${category} (${difference < 0 ? "Kurang" : "Lebih"})`,
+            opnameId,
+            createdAt: new Date().toISOString()
+        });
+    }
+
+    saveData();
+
+    closeModal("opnameModal");
+
+    refreshAll();
+
+    showToast(
+        "Stok opname berhasil disimpan.",
+        "success"
+    );
+
+}
+
+
+function renderOpname() {
+
+    const tbody =
+        document.getElementById(
+            "opnameTable"
+        );
+
+
+    const rows =
+        [...opname].reverse();
+
+
+    if (!rows.length) {
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="9"
+                    class="empty">
+                    Belum ada stok opname.
+                </td>
+            </tr>
+        `;
+
+    } else {
+
+        tbody.innerHTML =
+            rows.map(item => {
+
+                const product =
+                    products.find(
+                        p =>
+                            p.id ===
+                            item.productId
+                    );
+
+
+                const statusClass =
+                    item.status
+                        .toLowerCase();
+
+
+                return `
+                    <tr>
+
+                        <td>
+                            ${formatDate(item.date)}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                product?.name ||
+                                "-"
+                            )}
+                        </td>
+
+                        <td>
+                            <span class="badge ${(item.category || product?.category || "Reseller").toLowerCase()}">
+                                ${escapeHtml(item.category || product?.category || "Reseller")}
+                            </span>
+                        </td>
+
+                        <td>
+                            ${formatNumber(
+                                item.systemStock
+                            )}
+                        </td>
+
+                        <td>
+                            ${formatNumber(
+                                item.physicalStock
+                            )}
+                        </td>
+
+                        <td>
+                            <strong>
+                                ${
+                                    item.difference > 0
+                                        ? "+"
+                                        : ""
+                                }${formatNumber(
+                                    item.difference
+                                )}
+                            </strong>
+                        </td>
+
+                        <td>
+                            <span class="status ${statusClass}">
+                                ${item.status}
+                            </span>
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                item.note || "-"
+                            )}
+                        </td>
+
+                        <td>
+                            <button
+                                class="small-btn danger-btn"
+                                onclick="deleteOpname('${item.id}')">
+                                Hapus
+                            </button>
+                        </td>
+
+                    </tr>
+                `;
+
+            }).join("");
+
+    }
+
+
+    const shortage =
+        opname
+            .filter(
+                o => o.status === "Kurang"
+            )
+            .reduce(
+                (sum, o) =>
+                    sum +
+                    Math.abs(
+                        Number(o.difference)
+                    ),
+                0
+            );
+
+
+    const excess =
+        opname
+            .filter(
+                o => o.status === "Lebih"
+            )
+            .reduce(
+                (sum, o) =>
+                    sum +
+                    Number(o.difference),
+                0
+            );
+
+
+    document.getElementById(
+        "opnameShortage"
+    ).textContent =
+        formatNumber(shortage);
+
+
+    document.getElementById(
+        "opnameExcess"
+    ).textContent =
+        formatNumber(excess);
+
+}
+
+
+function deleteOpname(id) {
+
+    if (
+        !confirm(
+            "Hapus data stok opname?"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    opname =
+        opname.filter(
+            o => o.id !== id
+        );
+
+    transactions =
+        transactions.filter(
+            t => t.opnameId !== id
+        );
+
+
+    saveData();
+
+    refreshAll();
+
+}
+
+
+/* =========================================================
+   REPORT
+========================================================= */
+
+function renderReport() {
+
+    const month =
+        document.getElementById(
+            "reportMonth"
+        ).value ||
+        currentMonth();
+
+
+    const monthly =
+        transactions.filter(
+            trx =>
+                trx.date.startsWith(month)
+        );
+
+
+    const incoming =
+        monthly
+            .filter(
+                t => t.type === "Masuk"
+            )
+            .reduce(
+                (s, t) =>
+                    s + Number(t.qty),
+                0
+            );
+
+
+    const outgoing =
+        monthly
+            .filter(
+                t => t.type === "Keluar"
+            )
+            .reduce(
+                (s, t) =>
+                    s + Number(t.qty),
+                0
+            );
+
+
+    const reseller =
+        monthly
+            .filter(
+                t =>
+                    t.type === "Keluar" &&
+                    t.category === "Reseller"
+            )
+            .reduce(
+                (s, t) =>
+                    s + Number(t.qty),
+                0
+            );
+
+
+    const pemakai =
+        monthly
+            .filter(
+                t =>
+                    t.type === "Keluar" &&
+                    t.category === "Pemakai"
+            )
+            .reduce(
+                (s, t) =>
+                    s + Number(t.qty),
+                0
+            );
+
+
+    const incomingValue =
+        monthly
+            .filter(
+                t => t.type === "Masuk"
+            )
+            .reduce(
+                (s, t) =>
+                    s +
+                    Number(t.totalValue),
+                0
+            );
+
+
+    const outgoingValue =
+        monthly
+            .filter(
+                t => t.type === "Keluar"
+            )
+            .reduce(
+                (s, t) =>
+                    s +
+                    Number(t.totalValue),
+                0
+            );
+
+    const monthlyProfitLoss =
+        monthly
+            .filter(t => t.type === "Keluar")
+            .reduce(
+                (sum, trx) => {
+                    const product =
+                        products.find(
+                            p => p.id === trx.productId
+                        );
+                    const cost = product
+                        ? getProductAverageCost(product)
+                        : 0;
+
+                    return sum +
+                        (Number(trx.totalValue || 0) -
+                         Number(trx.qty || 0) * cost);
+                },
+                0
+            );
+
+    const reportProfit =
+        Math.max(monthlyProfitLoss, 0);
+    const reportLoss =
+        Math.abs(Math.min(monthlyProfitLoss, 0));
+
+
+    const inventoryValue =
+        products.reduce(
+            (sum, product) =>
+                sum +
+                getCurrentStock(product) *
+                Number(product.price || 0),
+            0
+        );
+
+
+    document.getElementById(
+        "reportIncoming"
+    ).textContent =
+        formatNumber(incoming);
+
+
+    document.getElementById(
+        "reportOutgoing"
+    ).textContent =
+        formatNumber(outgoing);
+
+
+    document.getElementById(
+        "reportReseller"
+    ).textContent =
+        formatNumber(reseller);
+
+
+    document.getElementById(
+        "reportPemakai"
+    ).textContent =
+        formatNumber(pemakai);
+
+
+    document.getElementById(
+        "reportIncomingValue"
+    ).textContent =
+        formatRupiah(incomingValue);
+
+
+    document.getElementById(
+        "reportOutgoingValue"
+    ).textContent =
+        formatRupiah(outgoingValue);
+
+    document.getElementById(
+        "reportProfit"
+    ).textContent =
+        formatRupiah(reportProfit);
+
+    document.getElementById(
+        "reportLoss"
+    ).textContent =
+        formatRupiah(reportLoss);
+
+
+    document.getElementById(
+        "reportInventoryValue"
+    ).textContent =
+        formatRupiah(inventoryValue);
+
+
+    document.getElementById(
+        "chartIncoming"
+    ).textContent =
+        formatNumber(incoming);
+
+
+    document.getElementById(
+        "chartOutgoing"
+    ).textContent =
+        formatNumber(outgoing);
+
+
+    const max =
+        Math.max(
+            incoming,
+            outgoing,
+            1
+        );
+
+
+    document.getElementById(
+        "barIncoming"
+    ).style.width =
+        `${(incoming / max) * 100}%`;
+
+
+    document.getElementById(
+        "barOutgoing"
+    ).style.width =
+        `${(outgoing / max) * 100}%`;
+
+
+    renderReportTable();
+
+}
+
+
+function renderReportTable() {
+
+    const month =
+        document.getElementById(
+            "reportMonth"
+        ).value ||
+        currentMonth();
+
+
+    const tbody =
+        document.getElementById(
+            "reportTable"
+        );
+
+
+    tbody.innerHTML =
+        products.map(product => {
+
+            const incoming =
+                transactions
+                    .filter(
+                        t =>
+                            t.productId ===
+                                product.id &&
+                            t.type === "Masuk" &&
+                            t.date.startsWith(month)
+                    )
+                    .reduce(
+                        (s, t) =>
+                            s + Number(t.qty),
+                        0
+                    );
+
+
+            const outgoing =
+                transactions
+                    .filter(
+                        t =>
+                            t.productId ===
+                                product.id &&
+                            t.type === "Keluar" &&
+                            t.date.startsWith(month)
+                    )
+                    .reduce(
+                        (s, t) =>
+                            s + Number(t.qty),
+                        0
+                    );
+
+
+            const stock =
+                getCurrentStock(product);
+
+
+            const cost =
+                getProductAverageCost(product);
+
+            const productProfitLoss =
+                transactions
+                    .filter(
+                        t =>
+                            t.productId === product.id &&
+                            t.type === "Keluar" &&
+                            t.date.startsWith(month)
+                    )
+                    .reduce(
+                        (sum, t) =>
+                            sum +
+                            (Number(t.totalValue || 0) -
+                             Number(t.qty || 0) * cost),
+                        0
+                    );
+
+            const productProfit =
+                Math.max(productProfitLoss, 0);
+
+            const productLoss =
+                Math.abs(Math.min(productProfitLoss, 0));
+
+
+            return `
+                <tr>
+
+                    <td>
+                        <strong>
+                            ${escapeHtml(product.name)}
+                        </strong>
+                    </td>
+
+                    <td>
+                        <span class="badge ${product.category.toLowerCase()}">
+                            ${product.category}
+                        </span>
+                    </td>
+
+                    <td class="text-green">
+                        +${formatNumber(incoming)}
+                    </td>
+
+                    <td class="text-red">
+                        -${formatNumber(outgoing)}
+                    </td>
+
+                    <td>
+                        <strong>
+                            ${formatNumber(stock)}
+                        </strong>
+                    </td>
+
+                    <td>
+                        ${formatRupiah(product.price)}
+                    </td>
+
+                    <td class="text-green">
+                        ${formatRupiah(productProfit)}
+                    </td>
+
+                    <td class="text-red">
+                        ${formatRupiah(productLoss)}
+                    </td>
+
+                </tr>
+            `;
+
+        }).join("");
+
+
+    if (!products.length) {
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8"
+                    class="empty">
+                    Belum ada barang.
+                </td>
+            </tr>
+        `;
+
+    }
+
+}
+
+
+/* =========================================================
+   RECENT / LOW STOCK
+========================================================= */
+
+function renderRecentTransactions() {
+
+    const container =
+        document.getElementById(
+            "recentTransactions"
+        );
+
+
+    const recent =
+        [...transactions]
+        .sort(
+            (a, b) =>
+                new Date(b.createdAt) -
+                new Date(a.createdAt)
+        )
+        .slice(0, 6);
+
+
+    if (!recent.length) {
+
+        container.innerHTML = `
+            <div class="empty">
+                Belum ada transaksi.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        recent.map(trx => {
+
+            const product =
+                products.find(
+                    p =>
+                        p.id ===
+                        trx.productId
+                );
+
+
+            const isIn =
+                trx.type === "Masuk";
+
+
+            return `
+                <div class="recent-item">
+
+                    <div class="recent-icon
+                        ${isIn ? "in" : "out"}">
+
+                        ${isIn ? "⬆️" : "⬇️"}
+
+                    </div>
+
+                    <div class="recent-info">
+
+                        <strong>
+                            ${escapeHtml(
+                                product?.name ||
+                                "-"
+                            )}
+                        </strong>
+
+                        <span>
+                            ${formatDate(trx.date)}
+                            •
+                            ${trx.category}
+                        </span>
+
+                    </div>
+
+                    <strong class="${isIn ? "text-green" : "text-red"}">
+                        ${isIn ? "+" : "-"}${formatNumber(trx.qty)}
+                    </strong>
+
+                </div>
+            `;
+
+        }).join("");
+
+}
+
+
+function renderLowStock() {
+
+    const container =
+        document.getElementById(
+            "lowStockList"
+        );
+
+
+    const low =
+        products.filter(
+            product =>
+                getCurrentStock(product) <=
+                Number(product.minStock || 0)
+        );
+
+
+    if (!low.length) {
+
+        container.innerHTML = `
+            <div class="empty">
+                Semua stok masih aman 👍
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        low.map(product => {
+
+            const stock =
+                getCurrentStock(product);
+
+
+            return `
+                <div class="low-stock-item">
+
+                    <div>
+
+                        <strong>
+                            ${escapeHtml(product.name)}
+                        </strong>
+
+                        <span>
+                            Minimum:
+                            ${formatNumber(product.minStock)}
+                        </span>
+
+                    </div>
+
+                    <strong class="stock-danger">
+                        ${formatNumber(stock)}
+                    </strong>
+
+                </div>
+            `;
+
+        }).join("");
+
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+function openModal(id) {
+
+    document.getElementById(
+        id
+    ).classList.add("show");
+
+}
+
+
+function closeModal(id) {
+
+    document.getElementById(
+        id
+    ).classList.remove("show");
+
+}
+
+
+document.querySelectorAll(
+    ".modal-overlay"
+).forEach(modal => {
+
+    modal.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target === modal
+            ) {
+
+                modal.classList.remove(
+                    "show"
+                );
+
+            }
+
+        }
+    );
+
+});
+
+
+/* =========================================================
+   DATE
+========================================================= */
+
+function formatDate(dateString) {
+
+    if (!dateString) return "-";
+
+
+    const date =
+        new Date(
+            dateString + "T00:00:00"
+        );
+
+
+    return date.toLocaleDateString(
+        "id-ID",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        }
+    );
+
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+let toastTimer;
+
+
+function showToast(
+    message,
+    type = "success"
+) {
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    toast.textContent =
+        message;
+
+
+    toast.className =
+        `toast show ${type}`;
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            () => {
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            3000
+        );
+
+}
+
+
+/* =========================================================
+   EXPORT CSV
+========================================================= */
+
+function exportCSV() {
+
+    const month =
+        document.getElementById(
+            "reportMonth"
+        ).value ||
+        currentMonth();
+
+
+    const rows = [
+
+        [
+            "Tanggal",
+            "Barang",
+            "Kategori",
+            "Tipe",
+            "Jumlah",
+            "Harga",
+            "Total",
+            "Keuntungan",
+            "Kerugian",
+            "Keterangan"
+        ]
+
+    ];
+
+
+    transactions
+        .filter(
+            t =>
+                t.date.startsWith(month)
+        )
+        .forEach(trx => {
+
+            const product =
+                products.find(
+                    p =>
+                        p.id ===
+                        trx.productId
+                );
+
+
+            const cost =
+                product
+                    ? getProductAverageCost(product)
+                    : 0;
+            const transactionProfitLoss =
+                trx.type === "Keluar"
+                    ? Number(trx.totalValue || 0) -
+                      Number(trx.qty || 0) * cost
+                    : 0;
+
+            rows.push([
+                trx.date,
+                product?.name || "-",
+                trx.category,
+                trx.type,
+                trx.qty,
+                trx.unitPrice,
+                trx.totalValue,
+                Math.max(transactionProfitLoss, 0),
+                Math.abs(Math.min(transactionProfitLoss, 0)),
+                trx.note || ""
+            ]);
+
+        });
+
+
+    const csv =
+        rows.map(row =>
+            row.map(cell =>
+                `"${String(cell)
+                    .replaceAll('"', '""')}"`
+            ).join(",")
+        ).join("\n");
+
+
+    const blob =
+        new Blob(
+            ["\ufeff" + csv],
+            {
+                type:
+                    "text/csv;charset=utf-8;"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    const a =
+        document.createElement("a");
+
+
+    a.href = url;
+
+    a.download =
+        `laporan-dshan-${month}.csv`;
+
+
+    a.click();
+
+
+    URL.revokeObjectURL(url);
+
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+function resetAllData() {
+
+    if (
+        !confirm(
+            "PERINGATAN!\n\nSemua barang, transaksi, dan stok opname akan dihapus.\n\nLanjutkan?"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    products = [];
+
+    transactions = [];
+
+    opname = [];
+
+
+    saveData();
+
+    refreshAll();
+
+    showToast(
+        "Semua data berhasil dihapus.",
+        "success"
+    );
+
+}
+
+
+/* =========================================================
+   REFRESH EVERYTHING
+========================================================= */
+
+function refreshAll() {
+
+    renderDashboard();
+
+    renderStock();
+
+    renderTransactions();
+
+    renderOpname();
+
+    renderReport();
+
+}
+
+
+function initialize() {
+
+    document.getElementById(
+        "todayText"
+    ).textContent =
+        new Date().toLocaleDateString(
+            "id-ID",
+            {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric"
+            }
+        );
+
+
+    document.getElementById(
+        "reportMonth"
+    ).value =
+        currentMonth();
+
+
+    refreshAll();
+
+}
+
+
+initialize();
+
+</script>
+
+</body>
+</html>
